@@ -2,9 +2,9 @@ name: Build and Release
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ master ]
   workflow_dispatch:
 
 env:
@@ -55,7 +55,7 @@ jobs:
   release:
     needs: build
     runs-on: windows-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     
     permissions:
       contents: write
