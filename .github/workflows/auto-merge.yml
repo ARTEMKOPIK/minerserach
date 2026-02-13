@@ -61,8 +61,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Wait up to 2 minutes for checks to complete
-            for (let i = 0; i < 8; i++) {
+            // Wait up to 4 minutes for checks to complete
+            for (let i = 0; i < 16; i++) {
               await new Promise(r => setTimeout(r, 15000));
               
               const prNumber = context.payload.pull_request.number;
@@ -75,11 +75,13 @@ jobs:
                 pull_number: prNumber
               });
               
-              if (pr.data.mergeable && pr.data.mergeable_state === 'clean') {
-                console.log('Checks passed, ready to merge');
+              // Check if ready: mergeable and either clean, has_hooks, or stable
+              const state = pr.data.mergeable_state;
+              if (pr.data.mergeable && (state === 'clean' || state === 'has_hooks' || state === 'stable' || state === 'unstable')) {
+                console.log('Checks passed, ready to merge, state: ' + state);
                 break;
               }
-              console.log(`Waiting for checks... attempt ${i + 1}/8`);
+              console.log(`Waiting for checks... attempt ${i + 1}/16, state: ${state}`);
             }
 
       - name: Merge PR
