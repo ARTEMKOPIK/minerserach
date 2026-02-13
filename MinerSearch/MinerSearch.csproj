@@ -16,7 +16,10 @@
     <Product>MinerSearch</Product>
     <Description>Tool for finding and removing hidden miners</Description>
     <Copyright>Copyright © 2024</Copyright>
-    <PublishSingleFile>false</PublishSingleFile>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <StartupObject>MSearch.App</StartupObject>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>

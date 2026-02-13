@@ -40,22 +40,18 @@ jobs:
       run: dotnet test MinerSearch.sln -c Release --no-build --verbosity quiet
       continue-on-error: true
 
-    - name: Publish Framework-Dependent
-      run: dotnet publish MinerSearch/MinerSearch.csproj -c Release -r win-x64 --self-contained false -o ./publish/win-x64
+    - name: Publish Single-File EXE
+      run: dotnet publish MinerSearch/MinerSearch.csproj -c Release -r win-x64 --self-contained true -o ./publish
 
-    - name: Publish Self-Contained
-      run: dotnet publish MinerSearch/MinerSearch.csproj -c Release -r win-x64 --self-contained true -o ./publish/win-x64-standalone
-
-    - name: Create ZIP archives
+    - name: Rename EXE with version
       run: |
-        Compress-Archive -Path ./publish/win-x64/* -DestinationPath ./publish/MinerSearch-v${{ steps.version.outputs.APP_VERSION }}-win-x64.zip
-        Compress-Archive -Path ./publish/win-x64-standalone/* -DestinationPath ./publish/MinerSearch-v${{ steps.version.outputs.APP_VERSION }}-win-x64-standalone.zip
-      
-    - name: Upload artifacts
+        Move-Item ./publish/MinerSearch.exe ./publish/MinerSearch-v${{ steps.version.outputs.APP_VERSION }}.exe
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: build-output
-        path: publish/*.zip
+        path: publish/MinerSearch-v${{ steps.version.outputs.APP_VERSION }}.exe
 
   release:
     needs: build
@@ -87,13 +83,12 @@ jobs:
         tag_name: v${{ steps.version.outputs.APP_VERSION }}
         name: MinerSearch v${{ steps.version.outputs.APP_VERSION }}
         make_latest: true
-        files: artifacts/*.zip
+        files: artifacts/MinerSearch-v${{ steps.version.outputs.APP_VERSION }}.exe
         body: |
           ## MinerSearch v${{ steps.version.outputs.APP_VERSION }}
           
-          ### Downloads:
-          - **MinerSearch-v${{ steps.version.outputs.APP_VERSION }}-win-x64.zip** - Framework-dependent (requires .NET 8 Runtime)
-          - **MinerSearch-v${{ steps.version.outputs.APP_VERSION }}-win-x64-standalone.zip** - Self-contained (no .NET required)
+          ### Download:
+          - **MinerSearch-v${{ steps.version.outputs.APP_VERSION }}.exe** - Single-file, self-contained (no .NET required)
           
           ### Features:
           - .NET 8 WPF Application
