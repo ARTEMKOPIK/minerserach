@@ -1,0 +1,21 @@
+<Application x:Class="MSearch.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MSearch"
+             xmlns:converters="clr-namespace:MSearch.Infrastructure"
+             StartupUri="UI/Views/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Themes/LightTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Converters -->
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:ZeroToVisibleConverter x:Key="ZeroToVisibleConverter"/>
+            <converters:ThreatSeverityToColorConverter x:Key="ThreatSeverityToColorConverter"/>
+            <converters:NullToVisibleConverter x:Key="NullToVisibleConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
