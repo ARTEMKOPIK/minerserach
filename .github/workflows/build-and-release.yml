@@ -132,7 +132,7 @@ jobs:
         echo "APP_VERSION=$version" >> $env:GITHUB_OUTPUT
 
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: build-output
         path: artifacts
