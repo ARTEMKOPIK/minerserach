@@ -40,7 +40,7 @@
     <PackageReference Include="YamlDotNet" Version="15.1.2" />
     <PackageReference Include="TaskScheduler" Version="2.11.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
