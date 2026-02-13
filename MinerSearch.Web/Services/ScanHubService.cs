@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using MSearch.Models;
 
 namespace MinerSearch.Web.Services;
 
