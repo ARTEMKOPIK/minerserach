@@ -21,6 +21,7 @@
     <PublishSingleFile>false</PublishSingleFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <StartupObject>MSearch.App</StartupObject>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>

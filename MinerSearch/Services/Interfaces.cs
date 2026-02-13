@@ -1,3 +1,4 @@
+using MSearch;
 using MSearch.Models;
 
 namespace MSearch.Services;
