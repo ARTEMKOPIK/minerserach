@@ -3,7 +3,6 @@ name: Build and Release
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -61,7 +60,7 @@ jobs:
   release:
     needs: build
     runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     permissions:
       contents: write
@@ -85,8 +84,9 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref_name }}
+        tag_name: v${{ steps.version.outputs.APP_VERSION }}
         name: MinerSearch v${{ steps.version.outputs.APP_VERSION }}
+        make_latest: true
         files: artifacts/*.zip
         body: |
           ## MinerSearch v${{ steps.version.outputs.APP_VERSION }}
