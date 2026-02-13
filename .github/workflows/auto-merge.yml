@@ -1,0 +1,69 @@
+name: Auto Merge PR
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      pull-requests: write
+      contents: write
+    
+    steps:
+      - name: Enable auto-merge via API
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pullRequestId = context.payload.pull_request.node_id;
+            
+            // Enable auto-merge using GraphQL
+            const query = `
+              mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId}) {
+                  clientMutationId
+                }
+              }
+            `;
+            
+            try {
+              await github.graphql(query, { pullRequestId });
+              console.log('Auto-merge enabled successfully');
+            } catch (error) {
+              console.log('Auto-merge enable result:', error.message);
+            }
+
+      - name: Merge PR directly
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Get PR info
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            
+            // Check if mergeable and not already merged
+            if (pr.data.mergeable && pr.data.state === 'open') {
+              try {
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash'
+                });
+                console.log('PR merged successfully');
+              } catch (error) {
+                console.log('Merge result:', error.message);
+              }
+            } else {
+              console.log('PR not ready for merge or already merged');
+            }
