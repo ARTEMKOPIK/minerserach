@@ -42,10 +42,14 @@ jobs:
       id: bump
       run: |
         $version = (Get-Content version.txt -Raw).Trim()
+        # Remove 'v' prefix if present for parsing
+        $version = $version -replace '^v', ''
         $parts = $version.Split('.')
         $parts[3] = [string]([int]$parts[3] + 1)
         $newVersion = $parts -join '.'
-        Set-Content version.txt $newVersion -NoNewline
+        # Write WITH 'v' prefix to version.txt
+        Set-Content version.txt "v$newVersion" -NoNewline
+        # But APP_VERSION without 'v' for .NET
         echo "APP_VERSION=$newVersion" >> $env:GITHUB_OUTPUT
         echo "VERSION_BUMPED=true" >> $env:GITHUB_OUTPUT
         Write-Host "Version bumped: $version -> $newVersion"
@@ -55,6 +59,8 @@ jobs:
       id: read
       run: |
         $version = (Get-Content version.txt -Raw).Trim()
+        # Remove 'v' prefix if present for .NET
+        $version = $version -replace '^v', ''
         echo "APP_VERSION=$version" >> $env:GITHUB_OUTPUT
 
     - name: Set final version
@@ -132,6 +138,8 @@ jobs:
       run: |
         git pull origin main
         $version = (Get-Content version.txt -Raw).Trim()
+        # Remove 'v' prefix if present for .NET
+        $version = $version -replace '^v', ''
         echo "APP_VERSION=$version" >> $env:GITHUB_OUTPUT
 
     - name: Download artifacts

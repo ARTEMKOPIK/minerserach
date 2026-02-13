@@ -9,9 +9,9 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>MinerSearch</AssemblyName>
     <RootNamespace>MSearch</RootNamespace>
-    <Version>v1.4.8.6</Version>
-    <AssemblyVersion>v1.4.8.6</AssemblyVersion>
-    <FileVersion>v1.4.8.6</FileVersion>
+    <Version>1.4.8.6</Version>
+    <AssemblyVersion>1.4.8.6</AssemblyVersion>
+    <FileVersion>1.4.8.6</FileVersion>
     <Company>MinerSearch</Company>
     <Product>MinerSearch</Product>
     <Description>Tool for finding and removing hidden miners</Description>
