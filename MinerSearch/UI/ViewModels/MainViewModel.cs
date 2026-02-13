@@ -81,6 +81,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task StartScanAsync()
+    {
+        await StartQuickScan();
+    }
+
+    [RelayCommand]
     private async Task StartFullScan()
     {
         if (IsScanning) return;
@@ -193,7 +199,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void OnProgressChanged(object? sender, ScanProgress e)
+    private void OnProgressChanged(object? sender, ScanProgressModel e)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
@@ -218,7 +224,7 @@ public partial class MainViewModel : ObservableObject
         });
     }
 
-    private void OnScanCompleted(object? sender, ScanResult e)
+    private void OnScanCompleted(object? sender, ScanResultModel e)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {

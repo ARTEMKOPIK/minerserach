@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
+using MSearch;
+using MSearch.Models;
 
 namespace MinerSearch.Web.Services;
 
@@ -6,7 +8,7 @@ public class ScanHubService
 {
     private readonly IHubContext<Hubs.ScanHub> _hubContext;
     private ScanState _currentState = ScanState.Idle;
-    private ScanProgress _lastProgress = new();
+    private ScanProgressModel _lastProgress = new();
 
     public ScanHubService(IHubContext<Hubs.ScanHub> hubContext)
     {
@@ -24,7 +26,7 @@ public class ScanHubService
             if (_currentState != ScanState.Scanning)
                 break;
 
-            var progress = new ScanProgress
+            var progress = new ScanProgressModel
             {
                 FilesScanned = i * 100,
                 ThreatsFound = i > 50 ? 2 : 0,
@@ -40,7 +42,7 @@ public class ScanHubService
         }
 
         _currentState = ScanState.Completed;
-        var result = new ScanResult
+        var result = new ScanResultModel
         {
             ScanDate = DateTime.Now,
             Duration = TimeSpan.FromSeconds(5),

@@ -3,7 +3,6 @@ using Microsoft.Win32;
 using MSearch.Core;
 using MSearch.Infrastructure;
 using MSearch.UI;
-using NetFwTypeLib;
 using netlib;
 using System;
 using System.Collections.Generic;
@@ -1275,10 +1274,10 @@ namespace MSearch
                 Type typeFWPolicy2 = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
                 dynamic fwPolicy2 = Activator.CreateInstance(typeFWPolicy2);
 
-                INetFwRules rules = fwPolicy2.Rules;
+                dynamic rules = fwPolicy2.Rules;
                 foreach (string programPath in MSData.Instance.obfStr2)
                 {
-                    foreach (INetFwRule rule in rules)
+                    foreach (dynamic rule in rules)
                     {
                         if (rule.ApplicationName != null)
                         {

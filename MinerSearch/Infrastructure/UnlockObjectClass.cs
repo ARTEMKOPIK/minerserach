@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using MSearch.Core;
 using System;
 using System.ComponentModel;
@@ -72,9 +72,9 @@ namespace MSearch
                 FileSystemSecurity security;
 
                 if (Directory.Exists(path))
-                    security = new DirectorySecurity(path, AccessControlSections.Access);
+                    security = FileSystemAclExtensions.GetAccessControl(new DirectoryInfo(path));
                 else if (File.Exists(path))
-                    security = new FileSecurity(path, AccessControlSections.Access);
+                    security = FileSystemAclExtensions.GetAccessControl(new FileInfo(path));
                 else
                     return false;
 
@@ -311,7 +311,7 @@ namespace MSearch
         {
             try
             {
-                FileSecurity fileSecurity = File.GetAccessControl(filePath);
+                FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(new FileInfo(filePath));
 
                 FileSystemAccessRule denyReadExecuteRule = new FileSystemAccessRule(
                     new SecurityIdentifier(WellKnownSidType.WorldSid, null), // Everyone group
@@ -320,7 +320,7 @@ namespace MSearch
 
                 fileSecurity.AddAccessRule(denyReadExecuteRule);
 
-                File.SetAccessControl(filePath, fileSecurity);
+                FileSystemAclExtensions.SetAccessControl(new FileInfo(filePath), fileSecurity);
             }
             catch (ArgumentException) { }
             catch (FileNotFoundException) { }

@@ -1,5 +1,8 @@
 using MSearch.Models;
+using System.IO;
+using File = System.IO.File;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -12,6 +15,7 @@ public class TelegramBotService : ITelegramBotService
     private readonly IConfigService _configService;
     private readonly IScannerService _scannerService;
     private readonly Dictionary<long, bool> _authorizedUsers = new();
+    private CancellationTokenSource? _cts;
     
     public bool IsRunning { get; private set; }
     
@@ -34,9 +38,19 @@ public class TelegramBotService : ITelegramBotService
             var me = await _bot.GetMeAsync();
             
             IsRunning = true;
+            _cts = new CancellationTokenSource();
             
-            _bot.OnMessage += OnMessage;
-            _bot.OnCallbackQuery += OnCallbackQuery;
+            var receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+            };
+
+            _bot.StartReceiving(
+                updateHandler: HandleUpdateAsync,
+                pollingErrorHandler: HandlePollingErrorAsync,
+                receiverOptions: receiverOptions,
+                cancellationToken: _cts.Token
+            );
             
             App.Logger?.Information("Telegram bot started: @{Username}", me.Username);
         }
@@ -51,14 +65,34 @@ public class TelegramBotService : ITelegramBotService
     {
         if (!IsRunning) return Task.CompletedTask;
         
-        _bot?.CloseAsync();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
         IsRunning = false;
         
         App.Logger?.Information("Telegram bot stopped");
         return Task.CompletedTask;
     }
 
-    private async void OnMessage(object sender, Telegram.Bot.Types.Message msg)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        if (update.Message is { } message)
+        {
+            await OnMessage(message);
+        }
+        else if (update.CallbackQuery is { } callbackQuery)
+        {
+            await OnCallbackQuery(callbackQuery);
+        }
+    }
+
+    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    {
+        App.Logger?.Error(exception, "Telegram bot polling error");
+        return Task.CompletedTask;
+    }
+
+    private async Task OnMessage(Telegram.Bot.Types.Message msg)
     {
         if (msg.Type != MessageType.Text) return;
         
@@ -128,7 +162,7 @@ public class TelegramBotService : ITelegramBotService
         }
     }
 
-    private async void OnCallbackQuery(object sender, CallbackQuery msg)
+    private async Task OnCallbackQuery(CallbackQuery msg)
     {
         var chatId = msg.Message!.Chat.Id;
         var data = msg.Data ?? "";
@@ -181,7 +215,7 @@ public class TelegramBotService : ITelegramBotService
 
     private async Task SendStatusAsync(long chatId)
     {
-        var status = $"
+        var status = $@"
 🛡️ MinerSearch Status
 
 Состояние: {_scannerService.CurrentState}
@@ -251,7 +285,7 @@ public class TelegramBotService : ITelegramBotService
         
         try
         {
-            await _bot.SendTextMessageAsync(chatId, message, ParseMode.Markdown);
+            await _bot.SendTextMessageAsync(chatId, message, parseMode: ParseMode.Markdown);
         }
         catch (Exception ex)
         {
@@ -259,9 +293,9 @@ public class TelegramBotService : ITelegramBotService
         }
     }
 
-    public async Task SendScanProgressAsync(long chatId, ScanProgress progress)
+    public async Task SendScanProgressAsync(long chatId, ScanProgressModel progress)
     {
-        var message = $"
+        var message = $@"
 🔍 Сканирование...
 
 Файлов: {progress.FilesScanned}
@@ -273,7 +307,7 @@ public class TelegramBotService : ITelegramBotService
 
     public async Task SendThreatNotificationAsync(long chatId, ThreatInfo threat)
     {
-        var message = $"
+        var message = $@"
 ⚠️ Обнаружена угроза!
 
 Файл: {threat.FileName}

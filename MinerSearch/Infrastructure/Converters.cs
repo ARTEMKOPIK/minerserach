@@ -57,14 +57,14 @@ public class ThreatSeverityToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is Models.ThreatSeverity severity)
+        if (value is ThreatSeverity severity)
         {
             return severity switch
             {
-                Models.ThreatSeverity.Low => "#4CAF50",
-                Models.ThreatSeverity.Medium => "#FF9800",
-                Models.ThreatSeverity.High => "#F44336",
-                Models.ThreatSeverity.Critical => "#9C27B0",
+                ThreatSeverity.Low => "#4CAF50",
+                ThreatSeverity.Medium => "#FF9800",
+                ThreatSeverity.High => "#F44336",
+                ThreatSeverity.Critical => "#9C27B0",
                 _ => "#666666"
             };
         }

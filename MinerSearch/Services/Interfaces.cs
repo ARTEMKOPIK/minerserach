@@ -4,12 +4,12 @@ namespace MSearch.Services;
 
 public interface IScannerService
 {
-    event EventHandler<ScanProgress>? ProgressChanged;
+    event EventHandler<ScanProgressModel>? ProgressChanged;
     event EventHandler<ThreatInfo>? ThreatDetected;
-    event EventHandler<ScanResult>? ScanCompleted;
+    event EventHandler<ScanResultModel>? ScanCompleted;
 
     ScanState CurrentState { get; }
-    Task<ScanResult> StartScanAsync(ScanType type, string? customPath = null, CancellationToken cancellationToken = default);
+    Task<ScanResultModel> StartScanAsync(ScanType type, string? customPath = null, CancellationToken cancellationToken = default);
     void PauseScan();
     void ResumeScan();
     void CancelScan();
@@ -17,7 +17,7 @@ public interface IScannerService
 
 public interface IQuarantineService
 {
-    Task<List<QuarantineItem>> GetQuarantineItemsAsync();
+    Task<List<QuarantineItemModel>> GetQuarantineItemsAsync();
     Task<bool> QuarantineFileAsync(ThreatInfo threat);
     Task<bool> RestoreFileAsync(string quarantineId);
     Task<bool> DeleteFileAsync(string quarantineId);
@@ -52,7 +52,7 @@ public interface ITelegramBotService
     Task StartAsync(string token);
     Task StopAsync();
     Task SendMessageAsync(long chatId, string message);
-    Task SendScanProgressAsync(long chatId, ScanProgress progress);
+    Task SendScanProgressAsync(long chatId, ScanProgressModel progress);
     Task SendThreatNotificationAsync(long chatId, ThreatInfo threat);
 }
 

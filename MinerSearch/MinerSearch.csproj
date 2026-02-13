@@ -7,7 +7,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <AssemblyName>MinerSearch</AssemblyName>
     <RootNamespace>MSearch</RootNamespace>
     <Version>1.5.0.0</Version>
@@ -20,6 +19,8 @@
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>false</PublishSingleFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <StartupObject>MSearch.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,11 +36,19 @@
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="YamlDotNet" Version="15.1.2" />
+    <PackageReference Include="TaskScheduler" Version="2.11.0" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Resources\**" />
     <Resource Include="Resources\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\base\dbase.csproj" />
+    <ProjectReference Include="..\netlib\netlib.csproj" />
   </ItemGroup>
 
 </Project>

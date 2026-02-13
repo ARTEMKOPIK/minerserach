@@ -1,6 +1,7 @@
 using MSearch.Models;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management;
 using System.Security.Cryptography;
 using System.ServiceProcess;
@@ -26,9 +27,9 @@ public class ScannerService : IScannerService
     };
 
     public ScanState CurrentState { get; private set; } = ScanState.Idle;
-    public event EventHandler<ScanProgress>? ProgressChanged;
+    public event EventHandler<ScanProgressModel>? ProgressChanged;
     public event EventHandler<ThreatInfo>? ThreatDetected;
-    public event EventHandler<ScanResult>? ScanCompleted;
+    public event EventHandler<ScanResultModel>? ScanCompleted;
 
     public ScannerService(IConfigService configService, IQuarantineService quarantineService)
     {
@@ -36,7 +37,7 @@ public class ScannerService : IScannerService
         _quarantineService = quarantineService;
     }
 
-    public async Task<ScanResult> StartScanAsync(ScanType type, string? customPath = null, CancellationToken cancellationToken = default)
+    public async Task<ScanResultModel> StartScanAsync(ScanType type, string? customPath = null, CancellationToken cancellationToken = default)
     {
         if (CurrentState == ScanState.Scanning)
             throw new InvalidOperationException("Scan already in progress");
@@ -44,14 +45,14 @@ public class ScannerService : IScannerService
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         CurrentState = ScanState.Scanning;
         
-        var result = new ScanResult
+        var result = new ScanResultModel
         {
             WasFullScan = type == ScanType.Full,
             ScanDate = DateTime.Now
         };
 
         var stopwatch = Stopwatch.StartNew();
-        var progress = new ScanProgress { State = ScanState.Scanning };
+        var progress = new ScanProgressModel { State = ScanState.Scanning };
 
         try
         {
@@ -157,7 +158,7 @@ public class ScannerService : IScannerService
         _cancellationTokenSource?.Cancel();
     }
 
-    private async Task ScanProcessesAsync(ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanProcessesAsync(ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -230,7 +231,7 @@ public class ScannerService : IScannerService
         }, ct);
     }
 
-    private async Task ScanDirectoryAsync(string path, ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanDirectoryAsync(string path, ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -247,7 +248,7 @@ public class ScannerService : IScannerService
     }
 
     private void ScanDirectoryRecursive(string path, int currentDepth, int maxDepth, 
-        ScanProgress progress, ScanResult result, CancellationToken ct)
+        ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         WaitIfPaused();
@@ -346,7 +347,7 @@ public class ScannerService : IScannerService
         }
     }
 
-    private async Task ScanRegistryAsync(ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanRegistryAsync(ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -401,7 +402,7 @@ public class ScannerService : IScannerService
         }, ct);
     }
 
-    private async Task ScanServicesAsync(ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanServicesAsync(ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -455,7 +456,7 @@ public class ScannerService : IScannerService
         }, ct);
     }
 
-    private async Task ScanHostsFileAsync(ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanHostsFileAsync(ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -510,23 +511,23 @@ public class ScannerService : IScannerService
         }, ct);
     }
 
-    private async Task ScanScheduledTasksAsync(ScanProgress progress, ScanResult result, CancellationToken ct)
+    private async Task ScanScheduledTasksAsync(ScanProgressModel progress, ScanResultModel result, CancellationToken ct)
     {
         await Task.Run(() =>
         {
             try
             {
-                var taskService = new Microsoft.Win32.TaskScheduler.TaskService();
-                var tasks = taskService.GetTasks();
+                using var taskService = new Microsoft.Win32.TaskScheduler.TaskService();
+                var tasks = taskService.AllTasks;
                 
-                foreach (var task in tasks)
+                foreach (Microsoft.Win32.TaskScheduler.Task task in tasks)
                 {
                     ct.ThrowIfCancellationRequested();
                     WaitIfPaused();
 
                     try
                     {
-                        var taskName = task.Name.ToLower();
+                        string taskName = task.Name.ToLower();
                         
                         if (taskName.Contains("miner") || 
                             taskName.Contains("xmrig") ||
@@ -584,7 +585,7 @@ public class ScannerService : IScannerService
         }
     }
 
-    private string GenerateSummary(ScanResult result)
+    private string GenerateSummary(ScanResultModel result)
     {
         return $"Scan completed in {result.Duration.TotalSeconds:F1} seconds. " +
                $"Found {result.ThreatsDetected} threats. " +
