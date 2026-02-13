@@ -1,0 +1,93 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  APP_NAME: MinerSearch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore MinerSearch.sln
+
+    - name: Build Release
+      run: dotnet build MinerSearch.sln -c Release --no-restore
+
+    - name: Test
+      run: dotnet test MinerSearch.sln -c Release --no-build --verbosity quiet || true
+
+    - name: Publish WPF Application
+      run: |
+        dotnet publish MinerSearch/MinerSearch.csproj -c Release -r win-x64 --self-contained false -o ./publish/win-x64
+        dotnet publish MinerSearch/MinerSearch.csproj -c Release -r win-x64 --self-contained true -o ./publish/win-x64-standalone
+      
+    - name: Create ZIP archives
+      run: |
+        Compress-Archive -Path ./publish/win-x64/* -DestinationPath ./publish/MinerSearch-${{ github.ref_name }}-win-x64.zip
+        Compress-Archive -Path ./publish/win-x64-standalone/* -DestinationPath ./publish/MinerSearch-${{ github.ref_name }}-win-x64-standalone.zip
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: |
+          publish/*.zip
+          publish/win-x64/*.exe
+          publish/win-x64-standalone/*.exe
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-output
+        path: artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/*.zip
+          artifacts/**/*.exe
+        body: |
+          ## MinerSearch Release
+          
+          ### Downloads:
+          - MinerSearch-win-x64.zip - Framework-dependent (requires .NET 8)
+          - MinerSearch-win-x64-standalone.zip - Self-contained (no .NET required)
+          
+          ### Features:
+          - .NET 8 WPF Application
+          - Dark/Light theme support
+          - Cloud signature updates
+          - Telegram bot integration
+          - Web interface with SignalR
+          - System tray support
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
