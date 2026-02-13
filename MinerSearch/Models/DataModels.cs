@@ -24,7 +24,7 @@ public enum QuarantineStatus
     Deleted
 }
 
-public class ScanProgress
+public class ScanProgressModel
 {
     public int FilesScanned { get; set; }
     public int ThreatsFound { get; set; }
@@ -37,7 +37,7 @@ public class ScanProgress
     public List<ThreatInfo> RecentThreats { get; set; } = new();
 }
 
-public class ScanResult
+public class ScanResultModel
 {
     public DateTime ScanDate { get; set; } = DateTime.Now;
     public TimeSpan Duration { get; set; }
@@ -51,7 +51,7 @@ public class ScanResult
     public string Summary { get; set; } = string.Empty;
 }
 
-public class QuarantineItem
+public class QuarantineItemModel
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string OriginalPath { get; set; } = string.Empty;

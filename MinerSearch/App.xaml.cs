@@ -51,7 +51,7 @@ public partial class App : Application
             .CreateLogger();
 
         Logger = Log.Logger;
-        LoggerFactory = LoggerFactory.Create(builder =>
+        LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
         {
             builder.AddSerilog(Log.Logger);
         });

@@ -10,7 +10,7 @@ public class QuarantineService : IQuarantineService
 {
     private readonly string _quarantinePath;
     private readonly string _indexPath;
-    private List<QuarantineItem> _items = new();
+    private List<QuarantineItemModel> _items = new();
 
     public QuarantineService()
     {
@@ -31,7 +31,7 @@ public class QuarantineService : IQuarantineService
             if (File.Exists(_indexPath))
             {
                 var json = File.ReadAllText(_indexPath);
-                _items = JsonConvert.DeserializeObject<List<QuarantineItem>>(json) ?? new();
+                _items = JsonConvert.DeserializeObject<List<QuarantineItemModel>>(json) ?? new();
             }
         }
         catch (Exception ex)
@@ -54,7 +54,7 @@ public class QuarantineService : IQuarantineService
         }
     }
 
-    public Task<List<QuarantineItem>> GetQuarantineItemsAsync()
+    public Task<List<QuarantineItemModel>> GetQuarantineItemsAsync()
     {
         return Task.FromResult(_items.ToList());
     }
@@ -79,7 +79,7 @@ public class QuarantineService : IQuarantineService
                 File.Move(threat.FilePath, quarantinedPath);
 
                 // Create quarantine item
-                var item = new QuarantineItem
+                var item = new QuarantineItemModel
                 {
                     Id = quarantineId,
                     OriginalPath = threat.FilePath,
