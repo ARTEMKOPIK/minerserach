@@ -17,7 +17,7 @@ jobs:
     
     steps:
       - name: Approve PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -37,7 +37,7 @@ jobs:
             }
 
       - name: Enable auto-merge via API
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pullRequestId = context.payload.pull_request.node_id;
@@ -58,7 +58,7 @@ jobs:
             }
 
       - name: Wait for checks
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // Wait up to 4 minutes for checks to complete
@@ -85,7 +85,7 @@ jobs:
             }
 
       - name: Merge PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
