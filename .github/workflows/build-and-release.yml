@@ -149,7 +149,7 @@ jobs:
         path: artifacts
 
     - name: Create Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         tag_name: v${{ steps.version.outputs.APP_VERSION }}
         name: MinerSearch v${{ steps.version.outputs.APP_VERSION }}
